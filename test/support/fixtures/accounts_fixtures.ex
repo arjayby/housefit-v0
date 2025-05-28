@@ -9,11 +9,14 @@ defmodule Housefit.AccountsFixtures do
   alias Housefit.Accounts
   alias Housefit.Accounts.Scope
 
+  def unique_user_name, do: "user#{System.unique_integer()}"
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
   def valid_user_password, do: "hello world!"
 
+  @spec valid_user_attributes() :: any()
   def valid_user_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
+      name: unique_user_name(),
       email: unique_user_email()
     })
   end
