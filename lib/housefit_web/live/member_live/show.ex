@@ -11,10 +11,10 @@ defmodule HousefitWeb.MemberLive.Show do
         Member {@member.id}
         <:subtitle>This is a member record from your database.</:subtitle>
         <:actions>
-          <.button navigate={~p"/members"}>
+          <.button navigate={~p"/dashboard/members"}>
             <.icon name="hero-arrow-left" />
           </.button>
-          <.button variant="primary" navigate={~p"/members/#{@member}/edit?return_to=show"}>
+          <.button variant="primary" navigate={~p"/dashboard/members/#{@member}/edit?return_to=show"}>
             <.icon name="hero-pencil-square" /> Edit member
           </.button>
         </:actions>
@@ -57,7 +57,7 @@ defmodule HousefitWeb.MemberLive.Show do
     {:noreply,
      socket
      |> put_flash(:error, "The current member was deleted.")
-     |> push_navigate(to: ~p"/members")}
+     |> push_navigate(to: ~p"/dashboard/members")}
   end
 
   def handle_info({type, %Housefit.Gym.Member{}}, socket)

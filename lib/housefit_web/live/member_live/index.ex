@@ -8,9 +8,9 @@ defmodule HousefitWeb.MemberLive.Index do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <.header>
-        Listing Members
+        Members
         <:actions>
-          <.button variant="primary" navigate={~p"/members/new"}>
+          <.button variant="primary" navigate={~p"/dashboard/members/new"}>
             <.icon name="hero-plus" /> New Member
           </.button>
         </:actions>
@@ -19,17 +19,22 @@ defmodule HousefitWeb.MemberLive.Index do
       <.table
         id="members"
         rows={@streams.members}
-        row_click={fn {_id, member} -> JS.navigate(~p"/members/#{member}") end}
+        row_click={fn {_id, member} -> JS.navigate(~p"/dashboard/members/#{member}") end}
       >
-        <:col :let={{_id, member}} label="Email">{member.email}</:col>
-        <:col :let={{_id, member}} label="First name">{member.first_name}</:col>
-        <:col :let={{_id, member}} label="Last name">{member.last_name}</:col>
+        <:col :let={{_id, member}} label="Member">
+          <div class="flex items-center gap-3">
+            <div>
+              <div class="font-bold">{member.first_name} {member.last_name}</div>
+              <div class="text-sm opacity-50">{member.email}</div>
+            </div>
+          </div>
+        </:col>
         <:col :let={{_id, member}} label="Is active">{member.is_active}</:col>
         <:action :let={{_id, member}}>
           <div class="sr-only">
-            <.link navigate={~p"/members/#{member}"}>Show</.link>
+            <.link navigate={~p"/dashboard/members/#{member}"}>Show</.link>
           </div>
-          <.link navigate={~p"/members/#{member}/edit"}>Edit</.link>
+          <.link navigate={~p"/dashboard/members/#{member}/edit"}>Edit</.link>
         </:action>
         <:action :let={{id, member}}>
           <.link
@@ -53,7 +58,7 @@ defmodule HousefitWeb.MemberLive.Index do
     {:ok,
      socket
      |> assign(:page_title, "Listing Members")
-     |> stream(:members, Gym.list_members(socket.assigns.current_scope))}
+     |> stream(:members, Gym.list_all_members())}
   end
 
   @impl true
@@ -67,6 +72,6 @@ defmodule HousefitWeb.MemberLive.Index do
   @impl true
   def handle_info({type, %Housefit.Gym.Member{}}, socket)
       when type in [:created, :updated, :deleted] do
-    {:noreply, stream(socket, :members, Gym.list_members(socket.assigns.current_scope), reset: true)}
+    {:noreply, stream(socket, :members, Gym.list_all_members(), reset: true)}
   end
 end

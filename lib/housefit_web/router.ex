@@ -54,14 +54,22 @@ defmodule HousefitWeb.Router do
       on_mount: [{HousefitWeb.UserAuth, :require_authenticated}] do
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+    end
 
+    post "/users/update-password", UserSessionController, :update_password
+  end
+
+  scope "/dashboard", HousefitWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :default,
+      root_layout: {HousefitWeb.Layouts, :dashboard},
+      on_mount: [{HousefitWeb.UserAuth, :require_authenticated}] do
       live "/members", MemberLive.Index, :index
       live "/members/new", MemberLive.Form, :new
       live "/members/:id", MemberLive.Show, :show
       live "/members/:id/edit", MemberLive.Form, :edit
     end
-
-    post "/users/update-password", UserSessionController, :update_password
   end
 
   scope "/", HousefitWeb do

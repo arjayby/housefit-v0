@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title default="Housefit" suffix=" · Phoenix Framework">
+      {assigns[:page_title]}
+    </.live_title>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
+    </script>
+    <script>
+      (() => {
+        const setTheme = (theme) => {
+          if (theme === "system") {
+            localStorage.removeItem("phx:theme");
+            document.documentElement.removeAttribute("data-theme");
+          } else {
+            localStorage.setItem("phx:theme", theme);
+            document.documentElement.setAttribute("data-theme", theme);
+          }
+        };
+        setTheme(localStorage.getItem("phx:theme") || "system");
+        window.addEventListener("storage", (e) => e.key === "phx:theme" && setTheme(e.newValue || "system"));
+        window.addEventListener("phx:set-theme", ({ detail: { theme } }) => setTheme(theme));
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="drawer lg:drawer-open">
+      <input id="my-drawer" type="checkbox" class="drawer-toggle" />
+      <div class="drawer-content">
+        <main class="dashboard-content">
+          {@inner_content}
+        </main>
+      </div>
+      <div class="drawer-side">
+        <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+        <div class="flex flex-col min-h-full max-w-64 justify-between rounded-box px-2 py-4 bg-base-200">
+          <div class="flex flex-col gap-2">
+            <a href="/" class="flex items-center gap-2 mx-4 mt-2 mb-4">
+              <img src={~p"/images/logo.png"} width="36" />
+              <span class="text-sm font-semibold">Housefit Gym</span>
+            </a>
+            <div class="dropdown">
+              <div tabindex="0" role="button" class="btn flex justify-between items-center mx-1">
+                <div class="flex flex-col items-start">
+                  <span class="text-sm font-semibold truncate max-w-36">
+                    {@current_scope.user.name}
+                  </span>
+                  <span class="text-xs text-base-content/50 truncate max-w-36">
+                    {@current_scope.user.email}
+                  </span>
+                </div>
+                <.icon name="hero-chevron-up-down" />
+              </div>
+              <ul
+                tabindex="0"
+                class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+              >
+                <li><.link href={~p"/users/log-out"} method="delete">Log out</.link></li>
+              </ul>
+            </div>
+            <ul class="menu bg-base-200 w-56">
+              <li>
+                <.link navigate={~p"/dashboard/members"}>
+                  <.icon name="hero-users" /> Members
+                </.link>
+              </li>
+              <li>
+                <a class="py-2">
+                  <.icon name="hero-rectangle-stack" /> Inventory
+                </a>
+              </li>
+              <li>
+                <a class="py-2">
+                  <.icon name="hero-cog-6-tooth" /> Settings
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="flex items-center justify-between gap-2 px-4">
+            <p class="text-sm font-semibold">Theme</p>
+            <Layouts.theme_toggle />
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -19,16 +19,25 @@ defmodule Housefit.Gym do
     * {:deleted, %Member{}}
 
   """
-  def subscribe_members(%Scope{} = scope) do
-    key = scope.user.id
-
-    Phoenix.PubSub.subscribe(Housefit.PubSub, "user:#{key}:members")
+  def subscribe_members(%Scope{} = _scope) do
+    Phoenix.PubSub.subscribe(Housefit.PubSub, "user:admin:members")
   end
 
-  defp broadcast(%Scope{} = scope, message) do
-    key = scope.user.id
+  defp broadcast(%Scope{} = _scope, message) do
+    Phoenix.PubSub.broadcast(Housefit.PubSub, "user:admin:members", message)
+  end
 
-    Phoenix.PubSub.broadcast(Housefit.PubSub, "user:#{key}:members", message)
+  @doc """
+  Returns the list of all members.
+
+  ## Examples
+
+      iex> list_all_members()
+      [%Member{}, ...]
+
+  """
+  def list_all_members() do
+    Repo.all(Member)
   end
 
   @doc """
@@ -58,8 +67,8 @@ defmodule Housefit.Gym do
       ** (Ecto.NoResultsError)
 
   """
-  def get_member!(%Scope{} = scope, id) do
-    Repo.get_by!(Member, id: id, user_id: scope.user.id)
+  def get_member!(%Scope{} = _scope, id) do
+    Repo.get_by!(Member, id: id)
   end
 
   @doc """
@@ -97,8 +106,6 @@ defmodule Housefit.Gym do
 
   """
   def update_member(%Scope{} = scope, %Member{} = member, attrs) do
-    true = member.user_id == scope.user.id
-
     with {:ok, member = %Member{}} <-
            member
            |> Member.changeset(attrs, scope)
@@ -121,10 +128,7 @@ defmodule Housefit.Gym do
 
   """
   def delete_member(%Scope{} = scope, %Member{} = member) do
-    true = member.user_id == scope.user.id
-
-    with {:ok, member = %Member{}} <-
-           Repo.delete(member) do
+    with {:ok, member = %Member{}} <- Repo.delete(member) do
       broadcast(scope, {:deleted, member})
       {:ok, member}
     end
@@ -140,8 +144,6 @@ defmodule Housefit.Gym do
 
   """
   def change_member(%Scope{} = scope, %Member{} = member, attrs \\ %{}) do
-    true = member.user_id == scope.user.id
-
     Member.changeset(member, attrs, scope)
   end
 end

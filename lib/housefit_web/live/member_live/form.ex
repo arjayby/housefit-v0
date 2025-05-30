@@ -58,7 +58,9 @@ defmodule HousefitWeb.MemberLive.Form do
 
   @impl true
   def handle_event("validate", %{"member" => member_params}, socket) do
-    changeset = Gym.change_member(socket.assigns.current_scope, socket.assigns.member, member_params)
+    changeset =
+      Gym.change_member(socket.assigns.current_scope, socket.assigns.member, member_params)
+
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
@@ -96,6 +98,6 @@ defmodule HousefitWeb.MemberLive.Form do
     end
   end
 
-  defp return_path(_scope, "index", _member), do: ~p"/members"
-  defp return_path(_scope, "show", member), do: ~p"/members/#{member}"
+  defp return_path(_scope, "index", _member), do: ~p"/dashboard/members"
+  defp return_path(_scope, "show", member), do: ~p"/dashboard/members/#{member}"
 end
