@@ -10,7 +10,7 @@ defmodule HousefitWeb.GymSessionLive.Index do
       <.header>
         Listing Gym sessions
         <:actions>
-          <.button variant="primary" navigate={~p"/gym_sessions/new"}>
+          <.button variant="primary" navigate={~p"/dashboard/gym_sessions/new"}>
             <.icon name="hero-plus" /> New Gym session
           </.button>
         </:actions>
@@ -19,7 +19,9 @@ defmodule HousefitWeb.GymSessionLive.Index do
       <.table
         id="gym_sessions"
         rows={@streams.gym_sessions}
-        row_click={fn {_id, gym_session} -> JS.navigate(~p"/gym_sessions/#{gym_session}") end}
+        row_click={
+          fn {_id, gym_session} -> JS.navigate(~p"/dashboard/gym_sessions/#{gym_session}") end
+        }
       >
         <:col :let={{_id, gym_session}} label="Check in time">{gym_session.check_in_time}</:col>
         <:col :let={{_id, gym_session}} label="Check out time">{gym_session.check_out_time}</:col>
@@ -27,9 +29,9 @@ defmodule HousefitWeb.GymSessionLive.Index do
         <:col :let={{_id, gym_session}} label="Notes">{gym_session.notes}</:col>
         <:action :let={{_id, gym_session}}>
           <div class="sr-only">
-            <.link navigate={~p"/gym_sessions/#{gym_session}"}>Show</.link>
+            <.link navigate={~p"/dashboard/gym_sessions/#{gym_session}"}>Show</.link>
           </div>
-          <.link navigate={~p"/gym_sessions/#{gym_session}/edit"}>Edit</.link>
+          <.link navigate={~p"/dashboard/gym_sessions/#{gym_session}/edit"}>Edit</.link>
         </:action>
         <:action :let={{id, gym_session}}>
           <.link
@@ -67,6 +69,9 @@ defmodule HousefitWeb.GymSessionLive.Index do
   @impl true
   def handle_info({type, %Housefit.Gym.GymSession{}}, socket)
       when type in [:created, :updated, :deleted] do
-    {:noreply, stream(socket, :gym_sessions, Gym.list_gym_sessions(socket.assigns.current_scope), reset: true)}
+    {:noreply,
+     stream(socket, :gym_sessions, Gym.list_gym_sessions(socket.assigns.current_scope),
+       reset: true
+     )}
   end
 end

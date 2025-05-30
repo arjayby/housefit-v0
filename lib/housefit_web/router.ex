@@ -69,6 +69,21 @@ defmodule HousefitWeb.Router do
       live "/members/new", MemberLive.Form, :new
       live "/members/:id", MemberLive.Show, :show
       live "/members/:id/edit", MemberLive.Form, :edit
+
+      live "/member_memberships", MemberMembershipLive.Index, :index
+      live "/member_memberships/new", MemberMembershipLive.Form, :new
+      live "/member_memberships/:id", MemberMembershipLive.Show, :show
+      live "/member_memberships/:id/edit", MemberMembershipLive.Form, :edit
+
+      live "/membership_types", MembershipTypeLive.Index, :index
+      live "/membership_types/new", MembershipTypeLive.Form, :new
+      live "/membership_types/:id", MembershipTypeLive.Show, :show
+      live "/membership_types/:id/edit", MembershipTypeLive.Form, :edit
+
+      live "/gym_sessions", GymSessionLive.Index, :index
+      live "/gym_sessions/new", GymSessionLive.Form, :new
+      live "/gym_sessions/:id", GymSessionLive.Show, :show
+      live "/gym_sessions/:id/edit", GymSessionLive.Form, :edit
     end
   end
 

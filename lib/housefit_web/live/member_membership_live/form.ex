@@ -30,7 +30,9 @@ defmodule HousefitWeb.MemberMembershipLive.Form do
         <.input field={@form[:notes]} type="textarea" label="Notes" />
         <footer>
           <.button phx-disable-with="Saving..." variant="primary">Save Member membership</.button>
-          <.button navigate={return_path(@current_scope, @return_to, @member_membership)}>Cancel</.button>
+          <.button navigate={return_path(@current_scope, @return_to, @member_membership)}>
+            Cancel
+          </.button>
         </footer>
       </.form>
     </Layouts.app>
@@ -54,7 +56,10 @@ defmodule HousefitWeb.MemberMembershipLive.Form do
     socket
     |> assign(:page_title, "Edit Member membership")
     |> assign(:member_membership, member_membership)
-    |> assign(:form, to_form(Gym.change_member_membership(socket.assigns.current_scope, member_membership)))
+    |> assign(
+      :form,
+      to_form(Gym.change_member_membership(socket.assigns.current_scope, member_membership))
+    )
   end
 
   defp apply_action(socket, :new, _params) do
@@ -63,12 +68,21 @@ defmodule HousefitWeb.MemberMembershipLive.Form do
     socket
     |> assign(:page_title, "New Member membership")
     |> assign(:member_membership, member_membership)
-    |> assign(:form, to_form(Gym.change_member_membership(socket.assigns.current_scope, member_membership)))
+    |> assign(
+      :form,
+      to_form(Gym.change_member_membership(socket.assigns.current_scope, member_membership))
+    )
   end
 
   @impl true
   def handle_event("validate", %{"member_membership" => member_membership_params}, socket) do
-    changeset = Gym.change_member_membership(socket.assigns.current_scope, socket.assigns.member_membership, member_membership_params)
+    changeset =
+      Gym.change_member_membership(
+        socket.assigns.current_scope,
+        socket.assigns.member_membership,
+        member_membership_params
+      )
+
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
@@ -77,13 +91,22 @@ defmodule HousefitWeb.MemberMembershipLive.Form do
   end
 
   defp save_member_membership(socket, :edit, member_membership_params) do
-    case Gym.update_member_membership(socket.assigns.current_scope, socket.assigns.member_membership, member_membership_params) do
+    case Gym.update_member_membership(
+           socket.assigns.current_scope,
+           socket.assigns.member_membership,
+           member_membership_params
+         ) do
       {:ok, member_membership} ->
         {:noreply,
          socket
          |> put_flash(:info, "Member membership updated successfully")
          |> push_navigate(
-           to: return_path(socket.assigns.current_scope, socket.assigns.return_to, member_membership)
+           to:
+             return_path(
+               socket.assigns.current_scope,
+               socket.assigns.return_to,
+               member_membership
+             )
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -98,7 +121,12 @@ defmodule HousefitWeb.MemberMembershipLive.Form do
          socket
          |> put_flash(:info, "Member membership created successfully")
          |> push_navigate(
-           to: return_path(socket.assigns.current_scope, socket.assigns.return_to, member_membership)
+           to:
+             return_path(
+               socket.assigns.current_scope,
+               socket.assigns.return_to,
+               member_membership
+             )
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -106,6 +134,8 @@ defmodule HousefitWeb.MemberMembershipLive.Form do
     end
   end
 
-  defp return_path(_scope, "index", _member_membership), do: ~p"/member_memberships"
-  defp return_path(_scope, "show", member_membership), do: ~p"/member_memberships/#{member_membership}"
+  defp return_path(_scope, "index", _member_membership), do: ~p"/dashboard/member_memberships"
+
+  defp return_path(_scope, "show", member_membership),
+    do: ~p"/dashboard/member_memberships/#{member_membership}"
 end

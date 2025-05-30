@@ -58,7 +58,13 @@ defmodule HousefitWeb.GymSessionLive.Form do
 
   @impl true
   def handle_event("validate", %{"gym_session" => gym_session_params}, socket) do
-    changeset = Gym.change_gym_session(socket.assigns.current_scope, socket.assigns.gym_session, gym_session_params)
+    changeset =
+      Gym.change_gym_session(
+        socket.assigns.current_scope,
+        socket.assigns.gym_session,
+        gym_session_params
+      )
+
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
@@ -67,7 +73,11 @@ defmodule HousefitWeb.GymSessionLive.Form do
   end
 
   defp save_gym_session(socket, :edit, gym_session_params) do
-    case Gym.update_gym_session(socket.assigns.current_scope, socket.assigns.gym_session, gym_session_params) do
+    case Gym.update_gym_session(
+           socket.assigns.current_scope,
+           socket.assigns.gym_session,
+           gym_session_params
+         ) do
       {:ok, gym_session} ->
         {:noreply,
          socket
@@ -96,6 +106,6 @@ defmodule HousefitWeb.GymSessionLive.Form do
     end
   end
 
-  defp return_path(_scope, "index", _gym_session), do: ~p"/gym_sessions"
-  defp return_path(_scope, "show", gym_session), do: ~p"/gym_sessions/#{gym_session}"
+  defp return_path(_scope, "index", _gym_session), do: ~p"/dashboard/gym_sessions"
+  defp return_path(_scope, "show", gym_session), do: ~p"/dashboard/gym_sessions/#{gym_session}"
 end

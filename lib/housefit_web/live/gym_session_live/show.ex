@@ -11,10 +11,13 @@ defmodule HousefitWeb.GymSessionLive.Show do
         Gym session {@gym_session.id}
         <:subtitle>This is a gym_session record from your database.</:subtitle>
         <:actions>
-          <.button navigate={~p"/gym_sessions"}>
+          <.button navigate={~p"/dashboard/gym_sessions"}>
             <.icon name="hero-arrow-left" />
           </.button>
-          <.button variant="primary" navigate={~p"/gym_sessions/#{@gym_session}/edit?return_to=show"}>
+          <.button
+            variant="primary"
+            navigate={~p"/dashboard/gym_sessions/#{@gym_session}/edit?return_to=show"}
+          >
             <.icon name="hero-pencil-square" /> Edit gym_session
           </.button>
         </:actions>
@@ -57,7 +60,7 @@ defmodule HousefitWeb.GymSessionLive.Show do
     {:noreply,
      socket
      |> put_flash(:error, "The current gym_session was deleted.")
-     |> push_navigate(to: ~p"/gym_sessions")}
+     |> push_navigate(to: ~p"/dashboard/gym_sessions")}
   end
 
   def handle_info({type, %Housefit.Gym.GymSession{}}, socket)

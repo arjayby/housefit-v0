@@ -19,8 +19,8 @@ defmodule Housefit.Gym.GymSession do
   @doc false
   def changeset(gym_session, attrs, user_scope) do
     gym_session
-    |> cast(attrs, [:check_in_time, :check_out_time, :session_date, :notes])
-    |> validate_required([:check_in_time, :check_out_time, :session_date, :notes])
+    |> cast(attrs, [:check_in_time, :check_out_time, :session_date, :notes, :user_id])
+    |> validate_required([:check_in_time, :session_date, :notes, :user_id])
     |> put_change(:user_id, user_scope.user.id)
   end
 end
