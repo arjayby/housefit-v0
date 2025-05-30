@@ -24,4 +24,23 @@ defmodule Housefit.GymFixtures do
     {:ok, member} = Housefit.Gym.create_member(scope, attrs)
     member
   end
+
+  @doc """
+  Generate a membership_type.
+  """
+  def membership_type_fixture(scope, attrs \\ %{}) do
+    attrs =
+      Enum.into(attrs, %{
+        description: "some description",
+        duration_months: 42,
+        is_active: true,
+        name: "some name",
+        price: "120.5",
+        session_count: 42,
+        type: :time_based
+      })
+
+    {:ok, membership_type} = Housefit.Gym.create_membership_type(scope, attrs)
+    membership_type
+  end
 end

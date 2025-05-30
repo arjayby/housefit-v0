@@ -146,4 +146,137 @@ defmodule Housefit.Gym do
   def change_member(%Scope{} = scope, %Member{} = member, attrs \\ %{}) do
     Member.changeset(member, attrs, scope)
   end
+
+  alias Housefit.Gym.MembershipType
+  alias Housefit.Accounts.Scope
+
+  @doc """
+  Subscribes to scoped notifications about any membership_type changes.
+
+  The broadcasted messages match the pattern:
+
+    * {:created, %MembershipType{}}
+    * {:updated, %MembershipType{}}
+    * {:deleted, %MembershipType{}}
+
+  """
+  def subscribe_membership_types(%Scope{} = scope) do
+    key = scope.user.id
+
+    Phoenix.PubSub.subscribe(Housefit.PubSub, "user:#{key}:membership_types")
+  end
+
+  @doc """
+  Returns the list of membership_types.
+
+  ## Examples
+
+      iex> list_membership_types(scope)
+      [%MembershipType{}, ...]
+
+  """
+  def list_membership_types(%Scope{} = scope) do
+    Repo.all(from membership_type in MembershipType, where: membership_type.user_id == ^scope.user.id)
+  end
+
+  @doc """
+  Gets a single membership_type.
+
+  Raises `Ecto.NoResultsError` if the Membership type does not exist.
+
+  ## Examples
+
+      iex> get_membership_type!(123)
+      %MembershipType{}
+
+      iex> get_membership_type!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_membership_type!(%Scope{} = scope, id) do
+    Repo.get_by!(MembershipType, id: id, user_id: scope.user.id)
+  end
+
+  @doc """
+  Creates a membership_type.
+
+  ## Examples
+
+      iex> create_membership_type(%{field: value})
+      {:ok, %MembershipType{}}
+
+      iex> create_membership_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_membership_type(%Scope{} = scope, attrs) do
+    with {:ok, membership_type = %MembershipType{}} <-
+           %MembershipType{}
+           |> MembershipType.changeset(attrs, scope)
+           |> Repo.insert() do
+      broadcast(scope, {:created, membership_type})
+      {:ok, membership_type}
+    end
+  end
+
+  @doc """
+  Updates a membership_type.
+
+  ## Examples
+
+      iex> update_membership_type(membership_type, %{field: new_value})
+      {:ok, %MembershipType{}}
+
+      iex> update_membership_type(membership_type, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_membership_type(%Scope{} = scope, %MembershipType{} = membership_type, attrs) do
+    true = membership_type.user_id == scope.user.id
+
+    with {:ok, membership_type = %MembershipType{}} <-
+           membership_type
+           |> MembershipType.changeset(attrs, scope)
+           |> Repo.update() do
+      broadcast(scope, {:updated, membership_type})
+      {:ok, membership_type}
+    end
+  end
+
+  @doc """
+  Deletes a membership_type.
+
+  ## Examples
+
+      iex> delete_membership_type(membership_type)
+      {:ok, %MembershipType{}}
+
+      iex> delete_membership_type(membership_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_membership_type(%Scope{} = scope, %MembershipType{} = membership_type) do
+    true = membership_type.user_id == scope.user.id
+
+    with {:ok, membership_type = %MembershipType{}} <-
+           Repo.delete(membership_type) do
+      broadcast(scope, {:deleted, membership_type})
+      {:ok, membership_type}
+    end
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking membership_type changes.
+
+  ## Examples
+
+      iex> change_membership_type(membership_type)
+      %Ecto.Changeset{data: %MembershipType{}}
+
+  """
+  def change_membership_type(%Scope{} = scope, %MembershipType{} = membership_type, attrs \\ %{}) do
+    true = membership_type.user_id == scope.user.id
+
+    MembershipType.changeset(membership_type, attrs, scope)
+  end
 end
