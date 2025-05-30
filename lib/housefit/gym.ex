@@ -279,4 +279,137 @@ defmodule Housefit.Gym do
 
     MembershipType.changeset(membership_type, attrs, scope)
   end
+
+  alias Housefit.Gym.MemberMembership
+  alias Housefit.Accounts.Scope
+
+  @doc """
+  Subscribes to scoped notifications about any member_membership changes.
+
+  The broadcasted messages match the pattern:
+
+    * {:created, %MemberMembership{}}
+    * {:updated, %MemberMembership{}}
+    * {:deleted, %MemberMembership{}}
+
+  """
+  def subscribe_member_memberships(%Scope{} = scope) do
+    key = scope.user.id
+
+    Phoenix.PubSub.subscribe(Housefit.PubSub, "user:#{key}:member_memberships")
+  end
+
+  @doc """
+  Returns the list of member_memberships.
+
+  ## Examples
+
+      iex> list_member_memberships(scope)
+      [%MemberMembership{}, ...]
+
+  """
+  def list_member_memberships(%Scope{} = scope) do
+    Repo.all(from member_membership in MemberMembership, where: member_membership.user_id == ^scope.user.id)
+  end
+
+  @doc """
+  Gets a single member_membership.
+
+  Raises `Ecto.NoResultsError` if the Member membership does not exist.
+
+  ## Examples
+
+      iex> get_member_membership!(123)
+      %MemberMembership{}
+
+      iex> get_member_membership!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_member_membership!(%Scope{} = scope, id) do
+    Repo.get_by!(MemberMembership, id: id, user_id: scope.user.id)
+  end
+
+  @doc """
+  Creates a member_membership.
+
+  ## Examples
+
+      iex> create_member_membership(%{field: value})
+      {:ok, %MemberMembership{}}
+
+      iex> create_member_membership(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_member_membership(%Scope{} = scope, attrs) do
+    with {:ok, member_membership = %MemberMembership{}} <-
+           %MemberMembership{}
+           |> MemberMembership.changeset(attrs, scope)
+           |> Repo.insert() do
+      broadcast(scope, {:created, member_membership})
+      {:ok, member_membership}
+    end
+  end
+
+  @doc """
+  Updates a member_membership.
+
+  ## Examples
+
+      iex> update_member_membership(member_membership, %{field: new_value})
+      {:ok, %MemberMembership{}}
+
+      iex> update_member_membership(member_membership, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_member_membership(%Scope{} = scope, %MemberMembership{} = member_membership, attrs) do
+    true = member_membership.user_id == scope.user.id
+
+    with {:ok, member_membership = %MemberMembership{}} <-
+           member_membership
+           |> MemberMembership.changeset(attrs, scope)
+           |> Repo.update() do
+      broadcast(scope, {:updated, member_membership})
+      {:ok, member_membership}
+    end
+  end
+
+  @doc """
+  Deletes a member_membership.
+
+  ## Examples
+
+      iex> delete_member_membership(member_membership)
+      {:ok, %MemberMembership{}}
+
+      iex> delete_member_membership(member_membership)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_member_membership(%Scope{} = scope, %MemberMembership{} = member_membership) do
+    true = member_membership.user_id == scope.user.id
+
+    with {:ok, member_membership = %MemberMembership{}} <-
+           Repo.delete(member_membership) do
+      broadcast(scope, {:deleted, member_membership})
+      {:ok, member_membership}
+    end
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking member_membership changes.
+
+  ## Examples
+
+      iex> change_member_membership(member_membership)
+      %Ecto.Changeset{data: %MemberMembership{}}
+
+  """
+  def change_member_membership(%Scope{} = scope, %MemberMembership{} = member_membership, attrs \\ %{}) do
+    true = member_membership.user_id == scope.user.id
+
+    MemberMembership.changeset(member_membership, attrs, scope)
+  end
 end

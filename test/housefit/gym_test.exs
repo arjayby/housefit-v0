@@ -192,4 +192,104 @@ defmodule Housefit.GymTest do
       assert %Ecto.Changeset{} = Gym.change_membership_type(scope, membership_type)
     end
   end
+
+  describe "member_memberships" do
+    alias Housefit.Gym.MemberMembership
+
+    import Housefit.AccountsFixtures, only: [user_scope_fixture: 0]
+    import Housefit.GymFixtures
+
+    @invalid_attrs %{status: nil, start_date: nil, end_date: nil, sessions_remaining: nil, sessions_total: nil, payment_amount: nil, payment_date: nil, notes: nil}
+
+    test "list_member_memberships/1 returns all scoped member_memberships" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      member_membership = member_membership_fixture(scope)
+      other_member_membership = member_membership_fixture(other_scope)
+      assert Gym.list_member_memberships(scope) == [member_membership]
+      assert Gym.list_member_memberships(other_scope) == [other_member_membership]
+    end
+
+    test "get_member_membership!/2 returns the member_membership with given id" do
+      scope = user_scope_fixture()
+      member_membership = member_membership_fixture(scope)
+      other_scope = user_scope_fixture()
+      assert Gym.get_member_membership!(scope, member_membership.id) == member_membership
+      assert_raise Ecto.NoResultsError, fn -> Gym.get_member_membership!(other_scope, member_membership.id) end
+    end
+
+    test "create_member_membership/2 with valid data creates a member_membership" do
+      valid_attrs = %{status: :active, start_date: ~D[2025-05-29], end_date: ~D[2025-05-29], sessions_remaining: 42, sessions_total: 42, payment_amount: "120.5", payment_date: ~D[2025-05-29], notes: "some notes"}
+      scope = user_scope_fixture()
+
+      assert {:ok, %MemberMembership{} = member_membership} = Gym.create_member_membership(scope, valid_attrs)
+      assert member_membership.status == :active
+      assert member_membership.start_date == ~D[2025-05-29]
+      assert member_membership.end_date == ~D[2025-05-29]
+      assert member_membership.sessions_remaining == 42
+      assert member_membership.sessions_total == 42
+      assert member_membership.payment_amount == Decimal.new("120.5")
+      assert member_membership.payment_date == ~D[2025-05-29]
+      assert member_membership.notes == "some notes"
+      assert member_membership.user_id == scope.user.id
+    end
+
+    test "create_member_membership/2 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      assert {:error, %Ecto.Changeset{}} = Gym.create_member_membership(scope, @invalid_attrs)
+    end
+
+    test "update_member_membership/3 with valid data updates the member_membership" do
+      scope = user_scope_fixture()
+      member_membership = member_membership_fixture(scope)
+      update_attrs = %{status: :expired, start_date: ~D[2025-05-30], end_date: ~D[2025-05-30], sessions_remaining: 43, sessions_total: 43, payment_amount: "456.7", payment_date: ~D[2025-05-30], notes: "some updated notes"}
+
+      assert {:ok, %MemberMembership{} = member_membership} = Gym.update_member_membership(scope, member_membership, update_attrs)
+      assert member_membership.status == :expired
+      assert member_membership.start_date == ~D[2025-05-30]
+      assert member_membership.end_date == ~D[2025-05-30]
+      assert member_membership.sessions_remaining == 43
+      assert member_membership.sessions_total == 43
+      assert member_membership.payment_amount == Decimal.new("456.7")
+      assert member_membership.payment_date == ~D[2025-05-30]
+      assert member_membership.notes == "some updated notes"
+    end
+
+    test "update_member_membership/3 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      member_membership = member_membership_fixture(scope)
+
+      assert_raise MatchError, fn ->
+        Gym.update_member_membership(other_scope, member_membership, %{})
+      end
+    end
+
+    test "update_member_membership/3 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      member_membership = member_membership_fixture(scope)
+      assert {:error, %Ecto.Changeset{}} = Gym.update_member_membership(scope, member_membership, @invalid_attrs)
+      assert member_membership == Gym.get_member_membership!(scope, member_membership.id)
+    end
+
+    test "delete_member_membership/2 deletes the member_membership" do
+      scope = user_scope_fixture()
+      member_membership = member_membership_fixture(scope)
+      assert {:ok, %MemberMembership{}} = Gym.delete_member_membership(scope, member_membership)
+      assert_raise Ecto.NoResultsError, fn -> Gym.get_member_membership!(scope, member_membership.id) end
+    end
+
+    test "delete_member_membership/2 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      member_membership = member_membership_fixture(scope)
+      assert_raise MatchError, fn -> Gym.delete_member_membership(other_scope, member_membership) end
+    end
+
+    test "change_member_membership/2 returns a member_membership changeset" do
+      scope = user_scope_fixture()
+      member_membership = member_membership_fixture(scope)
+      assert %Ecto.Changeset{} = Gym.change_member_membership(scope, member_membership)
+    end
+  end
 end
