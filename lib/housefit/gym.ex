@@ -412,4 +412,137 @@ defmodule Housefit.Gym do
 
     MemberMembership.changeset(member_membership, attrs, scope)
   end
+
+  alias Housefit.Gym.GymSession
+  alias Housefit.Accounts.Scope
+
+  @doc """
+  Subscribes to scoped notifications about any gym_session changes.
+
+  The broadcasted messages match the pattern:
+
+    * {:created, %GymSession{}}
+    * {:updated, %GymSession{}}
+    * {:deleted, %GymSession{}}
+
+  """
+  def subscribe_gym_sessions(%Scope{} = scope) do
+    key = scope.user.id
+
+    Phoenix.PubSub.subscribe(Housefit.PubSub, "user:#{key}:gym_sessions")
+  end
+
+  @doc """
+  Returns the list of gym_sessions.
+
+  ## Examples
+
+      iex> list_gym_sessions(scope)
+      [%GymSession{}, ...]
+
+  """
+  def list_gym_sessions(%Scope{} = scope) do
+    Repo.all(from gym_session in GymSession, where: gym_session.user_id == ^scope.user.id)
+  end
+
+  @doc """
+  Gets a single gym_session.
+
+  Raises `Ecto.NoResultsError` if the Gym session does not exist.
+
+  ## Examples
+
+      iex> get_gym_session!(123)
+      %GymSession{}
+
+      iex> get_gym_session!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_gym_session!(%Scope{} = scope, id) do
+    Repo.get_by!(GymSession, id: id, user_id: scope.user.id)
+  end
+
+  @doc """
+  Creates a gym_session.
+
+  ## Examples
+
+      iex> create_gym_session(%{field: value})
+      {:ok, %GymSession{}}
+
+      iex> create_gym_session(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_gym_session(%Scope{} = scope, attrs) do
+    with {:ok, gym_session = %GymSession{}} <-
+           %GymSession{}
+           |> GymSession.changeset(attrs, scope)
+           |> Repo.insert() do
+      broadcast(scope, {:created, gym_session})
+      {:ok, gym_session}
+    end
+  end
+
+  @doc """
+  Updates a gym_session.
+
+  ## Examples
+
+      iex> update_gym_session(gym_session, %{field: new_value})
+      {:ok, %GymSession{}}
+
+      iex> update_gym_session(gym_session, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_gym_session(%Scope{} = scope, %GymSession{} = gym_session, attrs) do
+    true = gym_session.user_id == scope.user.id
+
+    with {:ok, gym_session = %GymSession{}} <-
+           gym_session
+           |> GymSession.changeset(attrs, scope)
+           |> Repo.update() do
+      broadcast(scope, {:updated, gym_session})
+      {:ok, gym_session}
+    end
+  end
+
+  @doc """
+  Deletes a gym_session.
+
+  ## Examples
+
+      iex> delete_gym_session(gym_session)
+      {:ok, %GymSession{}}
+
+      iex> delete_gym_session(gym_session)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_gym_session(%Scope{} = scope, %GymSession{} = gym_session) do
+    true = gym_session.user_id == scope.user.id
+
+    with {:ok, gym_session = %GymSession{}} <-
+           Repo.delete(gym_session) do
+      broadcast(scope, {:deleted, gym_session})
+      {:ok, gym_session}
+    end
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking gym_session changes.
+
+  ## Examples
+
+      iex> change_gym_session(gym_session)
+      %Ecto.Changeset{data: %GymSession{}}
+
+  """
+  def change_gym_session(%Scope{} = scope, %GymSession{} = gym_session, attrs \\ %{}) do
+    true = gym_session.user_id == scope.user.id
+
+    GymSession.changeset(gym_session, attrs, scope)
+  end
 end

@@ -292,4 +292,96 @@ defmodule Housefit.GymTest do
       assert %Ecto.Changeset{} = Gym.change_member_membership(scope, member_membership)
     end
   end
+
+  describe "gym_sessions" do
+    alias Housefit.Gym.GymSession
+
+    import Housefit.AccountsFixtures, only: [user_scope_fixture: 0]
+    import Housefit.GymFixtures
+
+    @invalid_attrs %{check_in_time: nil, check_out_time: nil, session_date: nil, notes: nil}
+
+    test "list_gym_sessions/1 returns all scoped gym_sessions" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      gym_session = gym_session_fixture(scope)
+      other_gym_session = gym_session_fixture(other_scope)
+      assert Gym.list_gym_sessions(scope) == [gym_session]
+      assert Gym.list_gym_sessions(other_scope) == [other_gym_session]
+    end
+
+    test "get_gym_session!/2 returns the gym_session with given id" do
+      scope = user_scope_fixture()
+      gym_session = gym_session_fixture(scope)
+      other_scope = user_scope_fixture()
+      assert Gym.get_gym_session!(scope, gym_session.id) == gym_session
+      assert_raise Ecto.NoResultsError, fn -> Gym.get_gym_session!(other_scope, gym_session.id) end
+    end
+
+    test "create_gym_session/2 with valid data creates a gym_session" do
+      valid_attrs = %{check_in_time: ~U[2025-05-29 06:25:00Z], check_out_time: ~U[2025-05-29 06:25:00Z], session_date: ~D[2025-05-29], notes: "some notes"}
+      scope = user_scope_fixture()
+
+      assert {:ok, %GymSession{} = gym_session} = Gym.create_gym_session(scope, valid_attrs)
+      assert gym_session.check_in_time == ~U[2025-05-29 06:25:00Z]
+      assert gym_session.check_out_time == ~U[2025-05-29 06:25:00Z]
+      assert gym_session.session_date == ~D[2025-05-29]
+      assert gym_session.notes == "some notes"
+      assert gym_session.user_id == scope.user.id
+    end
+
+    test "create_gym_session/2 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      assert {:error, %Ecto.Changeset{}} = Gym.create_gym_session(scope, @invalid_attrs)
+    end
+
+    test "update_gym_session/3 with valid data updates the gym_session" do
+      scope = user_scope_fixture()
+      gym_session = gym_session_fixture(scope)
+      update_attrs = %{check_in_time: ~U[2025-05-30 06:25:00Z], check_out_time: ~U[2025-05-30 06:25:00Z], session_date: ~D[2025-05-30], notes: "some updated notes"}
+
+      assert {:ok, %GymSession{} = gym_session} = Gym.update_gym_session(scope, gym_session, update_attrs)
+      assert gym_session.check_in_time == ~U[2025-05-30 06:25:00Z]
+      assert gym_session.check_out_time == ~U[2025-05-30 06:25:00Z]
+      assert gym_session.session_date == ~D[2025-05-30]
+      assert gym_session.notes == "some updated notes"
+    end
+
+    test "update_gym_session/3 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      gym_session = gym_session_fixture(scope)
+
+      assert_raise MatchError, fn ->
+        Gym.update_gym_session(other_scope, gym_session, %{})
+      end
+    end
+
+    test "update_gym_session/3 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      gym_session = gym_session_fixture(scope)
+      assert {:error, %Ecto.Changeset{}} = Gym.update_gym_session(scope, gym_session, @invalid_attrs)
+      assert gym_session == Gym.get_gym_session!(scope, gym_session.id)
+    end
+
+    test "delete_gym_session/2 deletes the gym_session" do
+      scope = user_scope_fixture()
+      gym_session = gym_session_fixture(scope)
+      assert {:ok, %GymSession{}} = Gym.delete_gym_session(scope, gym_session)
+      assert_raise Ecto.NoResultsError, fn -> Gym.get_gym_session!(scope, gym_session.id) end
+    end
+
+    test "delete_gym_session/2 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      gym_session = gym_session_fixture(scope)
+      assert_raise MatchError, fn -> Gym.delete_gym_session(other_scope, gym_session) end
+    end
+
+    test "change_gym_session/2 returns a gym_session changeset" do
+      scope = user_scope_fixture()
+      gym_session = gym_session_fixture(scope)
+      assert %Ecto.Changeset{} = Gym.change_gym_session(scope, gym_session)
+    end
+  end
 end

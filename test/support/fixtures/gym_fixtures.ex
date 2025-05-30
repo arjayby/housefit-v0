@@ -63,4 +63,20 @@ defmodule Housefit.GymFixtures do
     {:ok, member_membership} = Housefit.Gym.create_member_membership(scope, attrs)
     member_membership
   end
+
+  @doc """
+  Generate a gym_session.
+  """
+  def gym_session_fixture(scope, attrs \\ %{}) do
+    attrs =
+      Enum.into(attrs, %{
+        check_in_time: ~U[2025-05-29 06:25:00Z],
+        check_out_time: ~U[2025-05-29 06:25:00Z],
+        notes: "some notes",
+        session_date: ~D[2025-05-29]
+      })
+
+    {:ok, gym_session} = Housefit.Gym.create_gym_session(scope, attrs)
+    gym_session
+  end
 end
